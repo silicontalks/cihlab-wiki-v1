@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>本地项目管理</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <section id="loginView" class="login-view">
+      <form id="loginForm" class="login-panel">
+        <p class="eyebrow">Project Workspace</p>
+        <h1>本地项目管理登录</h1>
+        <label>
+          <span>账号</span>
+          <input id="loginUsername" name="username" autocomplete="username" required />
+        </label>
+        <label>
+          <span>密码</span>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required />
+        </label>
+        <p id="loginError" class="form-error"></p>
+        <button class="primary-button" type="submit">登录</button>
+      </form>
+    </section>
+
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div>
+            <p class="eyebrow">Project Workspace</p>
+            <h1>项目列表</h1>
+          </div>
+          <button id="createProjectButton" class="icon-button" type="button" title="新建项目">+</button>
+        </div>
+        <label class="search-box">
+          <span>搜索</span>
+          <input id="searchInput" type="search" placeholder="项目名称" />
+        </label>
+        <div id="projectList" class="project-list"></div>
+      </aside>
+
+      <section class="content">
+        <header class="project-header">
+          <div>
+            <p id="projectStatus" class="eyebrow">请选择项目</p>
+            <h2 id="projectTitle">本地项目管理</h2>
+          </div>
+          <div class="header-actions">
+            <span id="currentUserLabel" class="user-label"></span>
+            <button id="logoutButton" type="button">退出</button>
+            <button id="editProjectButton" type="button" disabled>编辑</button>
+            <a class="secondary-link" href="/docs" target="_blank" rel="noreferrer">API 文档</a>
+          </div>
+        </header>
+
+        <section class="info-grid" aria-label="项目基本信息">
+          <div class="info-item">
+            <span>项目来源</span>
+            <strong id="sourceValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>开始时间</span>
+            <strong id="startDateValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>结束时间</span>
+            <strong id="endDateValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>项目经费</span>
+            <strong id="budgetValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>合作单位</span>
+            <strong id="partnersValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>项目负责人</span>
+            <strong id="ownerValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>财务负责人</span>
+            <strong id="financeOwnerValue">-</strong>
+          </div>
+          <div class="info-item">
+            <span>主要技术对接人</span>
+            <strong id="technicalContactValue">-</strong>
+          </div>
+        </section>
+
+        <nav class="tabs" aria-label="项目标签">
+          <button class="tab active" data-tab="tasks">项目总体进展</button>
+          <button class="tab" data-tab="nodeAlerts">节点提醒</button>
+          <button class="tab" data-tab="publications">论文/专利</button>
+          <button class="tab" data-tab="meetings">项目例会</button>
+          <button class="tab" data-tab="tests">项目测试</button>
+          <button class="tab" data-tab="equipment">设备/IP/流片</button>
+          <button class="tab" data-tab="finance">财务情况更新</button>
+          <button class="tab" data-tab="people">人员信息</button>
+          <button class="tab" data-tab="raw">项目文档</button>
+          <button class="tab" data-tab="knowledge">知识库</button>
+        </nav>
+
+        <section class="tab-panel">
+          <div class="panel-toolbar">
+            <div>
+              <p id="activeTabLabel" class="eyebrow">项目总体进展</p>
+              <h3 id="panelTitle">项目总体进展</h3>
+            </div>
+            <button id="panelAddButton" type="button" disabled>添加</button>
+          </div>
+          <div id="panelContent" class="panel-content"></div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="projectDialog" class="project-dialog">
+      <form id="projectForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Project Info</p>
+            <h3 id="projectDialogTitle">新建项目</h3>
+          </div>
+          <button id="closeProjectDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label class="wide">
+            <span>项目名称</span>
+            <input id="formName" name="name" required />
+          </label>
+          <label>
+            <span>项目来源</span>
+            <input id="formSource" name="source" />
+          </label>
+          <label>
+            <span>项目状态</span>
+            <select id="formStatus" name="status">
+              <option value="进行中">进行中</option>
+              <option value="已结题">已结题</option>
+              <option value="暂停">暂停</option>
+              <option value="归档">归档</option>
+            </select>
+          </label>
+          <label>
+            <span>开始时间</span>
+            <input id="formStartDate" name="start_date" type="date" />
+          </label>
+          <label>
+            <span>结束时间</span>
+            <input id="formEndDate" name="end_date" type="date" />
+          </label>
+          <label>
+            <span>项目经费</span>
+            <input id="formBudget" name="budget" type="number" min="0" step="0.01" />
+          </label>
+          <label>
+            <span>项目负责人</span>
+            <input id="formOwner" name="owner" />
+          </label>
+          <label>
+            <span>财务负责人</span>
+            <input id="formFinanceOwner" name="finance_owner" />
+          </label>
+          <label>
+            <span>主要技术对接人</span>
+            <input id="formTechnicalContact" name="technical_contact" />
+          </label>
+          <label>
+            <span>论文目标数</span>
+            <input id="formPaperTargetCount" name="paper_target_count" type="number" min="0" step="1" />
+          </label>
+          <label>
+            <span>专利目标数</span>
+            <input id="formPatentTargetCount" name="patent_target_count" type="number" min="0" step="1" />
+          </label>
+          <label class="wide">
+            <span>合作单位</span>
+            <input id="formPartners" name="partners" />
+          </label>
+          <label class="wide">
+            <span>项目简介</span>
+            <textarea id="formDescription" name="description" rows="4"></textarea>
+          </label>
+        </div>
+
+        <p id="projectFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelProjectFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="deleteProjectDialog" class="project-dialog confirm-dialog">
+      <form id="deleteProjectForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Delete Project</p>
+            <h3>删除项目</h3>
+          </div>
+          <button id="closeDeleteProjectDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="confirm-body">
+          <p id="deleteProjectMessage">确认删除这个项目吗？</p>
+          <label class="checkbox-row">
+            <input id="deleteProjectFolderCheckbox" type="checkbox" />
+            <span>同时删除项目数据库文件夹和项目文档</span>
+          </label>
+          <p class="warning-text">
+            不勾选时，只会从侧边栏隐藏项目并保留项目文件夹；勾选后会删除本地项目目录，原文件不可从 App 恢复。
+          </p>
+          <p id="deleteProjectError" class="form-error"></p>
+        </div>
+
+        <div class="dialog-actions">
+          <button id="cancelDeleteProjectButton" type="button">取消</button>
+          <button class="danger-button" type="submit">确认删除</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="milestoneDialog" class="project-dialog">
+      <form id="milestoneForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Node Alert</p>
+            <h3 id="milestoneDialogTitle">增加节点</h3>
+          </div>
+          <button id="closeMilestoneDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>提醒日期</span>
+            <input id="milestoneDueDate" name="due_date" type="date" />
+          </label>
+          <label>
+            <span>负责人</span>
+            <input id="milestoneOwner" name="owner" />
+          </label>
+          <label class="wide">
+            <span>节点目标</span>
+            <input id="milestoneTarget" name="target" required />
+          </label>
+          <label>
+            <span>考核方式</span>
+            <input id="milestoneAssessment" name="assessment" />
+          </label>
+          <label>
+            <span>状态</span>
+            <select id="milestoneStatus" name="status">
+              <option value="未开始">未开始</option>
+              <option value="进行中">进行中</option>
+              <option value="已完成">已完成</option>
+              <option value="延期">延期</option>
+            </select>
+          </label>
+          <label class="wide">
+            <span>备注</span>
+            <textarea id="milestoneNote" name="note" rows="3"></textarea>
+          </label>
+        </div>
+
+        <p id="milestoneFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelMilestoneFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存节点</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="progressTaskDialog" class="project-dialog">
+      <form id="progressTaskForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Project Progress</p>
+            <h3 id="progressTaskDialogTitle">增加任务</h3>
+          </div>
+          <button id="closeProgressTaskDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>课题名称</span>
+            <input id="progressSubjectName" name="subject_name" />
+          </label>
+          <label>
+            <span>任务名称</span>
+            <input id="progressTaskName" name="task_name" required />
+          </label>
+          <label>
+            <span>负责人</span>
+            <input id="progressOwner" name="owner" />
+          </label>
+          <label>
+            <span>完成进度（%）</span>
+            <input id="progressPercent" name="progress_percent" type="number" min="0" max="100" step="1" />
+          </label>
+          <label>
+            <span>开始时间</span>
+            <input id="progressStartDate" name="start_date" type="date" />
+          </label>
+          <label>
+            <span>结束时间</span>
+            <input id="progressEndDate" name="end_date" type="date" />
+          </label>
+          <label>
+            <span>状态</span>
+            <select id="progressStatus" name="status">
+              <option value="未开始">未开始</option>
+              <option value="进行中">进行中</option>
+              <option value="进展预警">进展预警</option>
+              <option value="已延期">已延期</option>
+              <option value="已完成">已完成</option>
+            </select>
+          </label>
+          <label class="wide">
+            <span>当前进展描述</span>
+            <textarea id="progressNote" name="progress_note" rows="4"></textarea>
+          </label>
+        </div>
+
+        <p id="progressTaskFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelProgressTaskFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存任务</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="equipmentPlanDialog" class="project-dialog">
+      <form id="equipmentPlanForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Equipment / IP / Tapeout</p>
+            <h3 id="equipmentPlanDialogTitle">增加规划</h3>
+          </div>
+          <button id="closeEquipmentPlanDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>时间</span>
+            <input id="equipmentPlanTime" name="plan_time" type="date" />
+          </label>
+          <label>
+            <span>预算</span>
+            <input id="equipmentPlanBudget" name="budget" type="number" min="0" step="0.01" />
+          </label>
+          <label>
+            <span>供应商</span>
+            <input id="equipmentPlanSupplier" name="supplier" />
+          </label>
+          <label class="wide">
+            <span>闭环材料要求</span>
+            <textarea id="equipmentPlanClosureMaterials" name="closure_material_requirements" rows="4"></textarea>
+          </label>
+        </div>
+
+        <p id="equipmentPlanFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelEquipmentPlanFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存规划</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="personDialog" class="project-dialog">
+      <form id="personForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">People</p>
+            <h3>增加人员</h3>
+          </div>
+          <button id="closePersonDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>序号</span>
+            <input id="personSequenceNo" name="sequence_no" type="number" min="1" />
+          </label>
+          <label>
+            <span>姓名</span>
+            <input id="personName" name="name" required />
+          </label>
+          <label>
+            <span>单位</span>
+            <input id="personOrganization" name="organization" />
+          </label>
+          <label>
+            <span>邮件</span>
+            <input id="personEmail" name="email" type="email" />
+          </label>
+          <label class="wide">
+            <span>负责内容</span>
+            <input id="personResponsibility" name="responsibility" />
+          </label>
+          <label class="wide">
+            <span>身份证号</span>
+            <input id="personIdNumber" name="id_number" />
+          </label>
+        </div>
+
+        <p id="personFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelPersonFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存人员</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="testDialog" class="project-dialog">
+      <form id="testForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Project Test</p>
+            <h3 id="testDialogTitle">增加测试项</h3>
+          </div>
+          <button id="closeTestDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label class="wide">
+            <span>课题/待测物名称</span>
+            <input id="testSubjectName" name="subject_name" required />
+          </label>
+          <label>
+            <span>指标名称</span>
+            <input id="testMetricName" name="metric_name" />
+          </label>
+          <label>
+            <span>是否第三方测试</span>
+            <select id="testThirdParty" name="third_party_test">
+              <option value="false">否</option>
+              <option value="true">是</option>
+            </select>
+          </label>
+          <label class="wide">
+            <span>预期中期指标</span>
+            <textarea id="testMidtermMetric" name="expected_midterm_metric" rows="3"></textarea>
+          </label>
+          <label class="wide">
+            <span>预期完成指标</span>
+            <textarea id="testFinalMetric" name="expected_final_metric" rows="3"></textarea>
+          </label>
+          <label class="wide">
+            <span>测试大纲缩略版</span>
+            <textarea id="testOutlineSummary" name="test_outline_summary" rows="4"></textarea>
+          </label>
+        </div>
+
+        <p id="testFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelTestFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存测试项</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="publicationDialog" class="project-dialog">
+      <form id="publicationForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Publication</p>
+            <h3 id="publicationDialogTitle">上传论文</h3>
+          </div>
+          <button id="closePublicationDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>序号</span>
+            <input id="publicationSequenceNo" name="sequence_no" type="number" min="1" />
+          </label>
+          <label class="wide">
+            <span id="publicationTitleLabel">名称</span>
+            <input id="publicationTitle" name="title" required />
+          </label>
+          <label id="paperAuthorsField" class="wide">
+            <span>作者列表</span>
+            <input id="paperAuthors" name="authors" />
+          </label>
+          <label id="patentApplicationNoField">
+            <span>专利号</span>
+            <input id="patentApplicationNo" name="application_no" />
+          </label>
+          <label id="patentStatusField">
+            <span>专利状态</span>
+            <input id="patentStatus" name="status" />
+          </label>
+          <label id="patentInventorsField" class="wide">
+            <span>发明人列表</span>
+            <input id="patentInventors" name="inventors" />
+          </label>
+          <label class="wide">
+            <span id="publicationLabelTypeLabel">是否唯一标注/第一标注</span>
+            <input id="publicationLabelType" name="label_type" />
+          </label>
+          <label class="wide">
+            <span id="publicationFileLabel">论文文件</span>
+            <input id="publicationFile" name="file" type="file" required />
+          </label>
+          <label class="wide">
+            <span>备注</span>
+            <textarea id="publicationNote" name="note" rows="3"></textarea>
+          </label>
+        </div>
+
+        <p id="publicationFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelPublicationFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存上传</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="publicationTargetDialog" class="project-dialog">
+      <form id="publicationTargetForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Publication Target</p>
+            <h3>编辑论文/专利目标</h3>
+          </div>
+          <button id="closePublicationTargetDialogButton" class="icon-button" type="button" title="关闭">×</button>
+        </div>
+
+        <div class="dialog-grid">
+          <label>
+            <span>论文目标数</span>
+            <input id="publicationPaperTargetCount" name="paper_target_count" type="number" min="0" step="1" />
+          </label>
+          <label>
+            <span>专利目标数</span>
+            <input id="publicationPatentTargetCount" name="patent_target_count" type="number" min="0" step="1" />
+          </label>
+        </div>
+
+        <p id="publicationTargetFormError" class="form-error"></p>
+
+        <div class="dialog-actions">
+          <button id="cancelPublicationTargetFormButton" type="button">取消</button>
+          <button class="primary-button" type="submit">保存目标</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

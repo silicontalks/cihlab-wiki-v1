@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+backend/.venv/
+.env
+.env.*
+!.env.example
+Backups/
+ProjectWorkspace/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+dist/
+build/
+node_modules/
