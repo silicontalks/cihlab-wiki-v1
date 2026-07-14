@@ -22,6 +22,8 @@ def list_projects(workspace_path: Optional[Path] = None, q: Optional[str] = None
     filters = ["deleted_at IS NULL"]
     params: list[str] = []
     user = get_current_user()
+    if not user:
+        raise ProjectError("请先登录")
 
     if q:
         filters.append("name LIKE ?")
@@ -29,7 +31,7 @@ def list_projects(workspace_path: Optional[Path] = None, q: Optional[str] = None
     if status:
         filters.append("status = ?")
         params.append(status)
-    if user and not is_admin(user):
+    if not is_admin(user):
         filters.append(
             """
             (
@@ -1309,7 +1311,9 @@ def get_project_person(person_id: int, workspace_path: Optional[Path] = None) ->
 
 def _assert_project_access(project: dict, database_path: Path) -> None:
     user = get_current_user()
-    if not user or is_admin(user):
+    if not user:
+        raise ProjectError("请先登录")
+    if is_admin(user):
         return
     username = str(user["username"])
     if project.get("created_by") == username:

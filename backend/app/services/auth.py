@@ -85,7 +85,7 @@ def get_user_by_token(token: str, workspace_path: Optional[Path] = None) -> dict
 def public_user(user: dict) -> dict:
     return {
         "username": user["username"],
-        "is_admin": bool(user.get("is_admin")),
+        "is_admin": is_admin(user),
         "display_name": user.get("display_name") or user["username"],
     }
 
@@ -100,7 +100,12 @@ def get_current_user() -> Optional[dict]:
 
 def is_admin(user: Optional[dict] = None) -> bool:
     current = user if user is not None else get_current_user()
-    return bool(current and current.get("is_admin"))
+    if not current:
+        return False
+    try:
+        return int(current.get("is_admin") or 0) == 1
+    except (TypeError, ValueError):
+        return False
 
 
 def current_username() -> str:
